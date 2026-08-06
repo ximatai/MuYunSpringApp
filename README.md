@@ -30,6 +30,61 @@ app-boot → app-demo-web → app-demo → MuYunSpring BOM / Starter
 
 真实业务以 `app-<domain>` / `app-<domain>-web` 成对扩展。详见[架构边界](docs/ARCHITECTURE.md)。
 
+## 最小业务链路：Todo
+
+Todo Demo 用三处业务代码发布一个“待办”模块。模型只声明业务字段；Service 选择需要的平台能力；Web 层声明模块身份后，标准 CRUD 与 OpenAPI 由平台投影出来。
+
+```java
+// app-demo/.../TodoItem.java
+@Table(name = "app_demo_todo_item", comment = "二开示例待办")
+public class TodoItem extends StandardTitledEntity {
+    @Column(name = "completed", type = ColumnType.BOOLEAN, nullable = false,
+            defaultVal = @Default(bool = TrueOrFalse.FALSE))
+    private Boolean completed = Boolean.FALSE;
+}
+```
+
+```java
+// app-demo/.../TodoItemService.java
+@Service
+public class TodoItemService extends AbstractAbilityService<TodoItem>
+        implements SoftDeleteAbility<TodoItem>, CacheAbility<TodoItem> {
+    public static final String MODULE_ALIAS = "demo.todo_item";
+
+    public TodoItemService(TodoItemDao dao) {
+        super(MODULE_ALIAS, TodoItem.class, dao);
+    }
+}
+```
+
+```java
+// app-demo-web/.../TodoItemWebController.java
+@RestController
+@PlatformStaticModule(application = TodoApplication.class,
+        alias = TodoItemService.MODULE_ALIAS, title = "待办")
+@StaticModuleOpenApi
+@RequestMapping("/" + TodoItemService.MODULE_ALIAS)
+public class TodoItemWebController extends WebSupport<TodoItemService>
+        implements CrudWeb<TodoItem, TodoItemService> {
+}
+```
+
+完整源码见 [TodoItem](app-demo/src/main/java/net/ximatai/muyun/app/demo/TodoItem.java)、[TodoItemService](app-demo/src/main/java/net/ximatai/muyun/app/demo/TodoItemService.java) 和 [TodoItemWebController](app-demo-web/src/main/java/net/ximatai/muyun/app/demo/web/TodoItemWebController.java)。
+
+应用启动并以拥有 `demo.todo_item` 查看权限的用户登录后，在浏览器打开：
+
+```text
+http://127.0.0.1:8080/demo.todo_item/openapi
+```
+
+该 URL 返回模块的 OpenAPI 3.1.1 文档，可直接看到 Todo 的模型 schema 与可用标准动作。对应的列表 schema URL 是：
+
+```text
+http://127.0.0.1:8080/demo.todo_item/query/schema
+```
+
+两个 URL 都遵循模块查看权限；未登录时返回 `401`，这表示权限链路正常生效。
+
 ## 快速运行
 
 要求 Java 21 和 Docker Compose v2。
