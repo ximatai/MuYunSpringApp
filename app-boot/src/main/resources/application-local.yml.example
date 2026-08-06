@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:54322/muyun_spring_app
+    username: postgres
+    password: muyun_dev
+
+muyun:
+  runtime:
+    mode: development
+  initial-admin:
+    initial-password: admin123
