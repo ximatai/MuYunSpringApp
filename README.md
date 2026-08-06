@@ -1,7 +1,7 @@
 # MuYunSpringApp
 
 `MuYunSpringApp` 是基于 [MuYunSpring](https://github.com/ximatai/MuYunSpring) 的独立业务应用样板，用于二次开发。
-它不复制框架的 `muyun-boot`，只通过 BOM 与 Starter 使用已发布的平台能力。
+它以自身的业务模块、应用配置和运行宿主组织交付，并通过 BOM 与 Starter 接入已发布的平台能力。
 
 ## 模块
 
