@@ -65,7 +65,7 @@ docker compose up -d
 ./gradlew test -PmuyunRepository=/path/to/muyun-consumer-repo
 ```
 
-完整的新增领域、运行配置、框架升级和验证步骤见[开发指南](docs/DEVELOPMENT.md)与[验证说明](docs/VERIFY.md)。
+完整的新增领域、运行配置、框架升级和验证步骤见[开发指南](docs/DEVELOPMENT.md)与[验证说明](docs/VERIFY.md)。需要判断平台已有能力和接入入口时，查看[平台能力索引](docs/PLATFORM_CAPABILITIES.md)。
 
 ## 开源许可
 
