@@ -1,17 +1,53 @@
 # 架构边界
 
-`MuYunSpringApp` 是独立业务应用：业务模块、应用配置和运行宿主都在本仓库内演进；平台能力通过稳定的 BOM 与 Starter 依赖接入。
+`MuYunSpringApp` 是独立业务应用：业务模块、应用配置和运行宿主都在本仓库内演进；MuYunSpring 通过稳定的 BOM 与 Starter 提供底座能力。
+
+## 模块关系
 
 Gradle 生产依赖方向（调用者 → 被依赖者）：
 
 ```text
-app-boot → app-demo-web → app-demo → MuYunSpring BOM / Starter
+app-boot → app-<domain>-web → app-<domain> → MuYunSpring BOM / Starter
 ```
 
-- `app-boot`：唯一 Spring Boot 宿主，负责启动、配置和模块组合。
-- `app-demo`：轻量业务领域示例；模型、DAO、Service 与平台能力组合留在这里，并保持领域层不含 Web 生产依赖。
-- `app-demo-web`：将业务 Service 投射为标准 HTTP 接口，复用平台提供的 CRUD、权限、租户、审计与生命周期链路。
+| 层 | 模块 | 负责什么 |
+| --- | --- | --- |
+| 应用组合 | `app-boot` | 启动、运行配置和已交付业务模块的组合。 |
+| HTTP 交付 | `app-<domain>-web` | 标准模块投影、独立 HTTP 契约和 Web 测试。 |
+| 业务领域 | `app-<domain>` | 模型、DAO、Service、领域规则与领域测试。 |
+| 平台依赖 | MuYunSpring BOM / Starter | 数据访问、Ability、平台配置、IAM 和通用 Web 交付能力。 |
 
-新增真实领域时，以 `app-<domain>` 与 `app-<domain>-web` 成对扩展。领域模块独立承载模型、DAO 和 Service；Web 模块依赖领域模块完成 HTTP 交付；`app-boot` 聚合可运行模块并保持为启动与配置入口。
+当前 `app-demo` / `app-demo-web` 是该结构的最小实例。
 
-Demo 的 `TodoItem` 展示最小静态链路：标准标题实体、`completed` 业务字段、`BaseDao`、组合软删与缓存能力的 Service，以及 `CrudWeb` 标准 Web 投影。
+## 职责边界
+
+### 领域模块
+
+领域模块表达业务事实和业务规则：模型字段、聚合关系、Service、DAO、领域配置与测试都归属这里。它通过 Ability 组合获得标准行为，例如软删、缓存、树、排序、引用和启停；业务规则仍保持在所属 Service 中。
+
+领域模块保持不含 Web 生产依赖。这样业务规则可以同时被标准 HTTP 投影、后台任务、消息消费或后续其他入口复用。
+
+### Web 模块
+
+Web 模块负责把领域 Service 交付为 HTTP 契约。标准业务对象优先使用 `WebSupport`、`CrudWeb` 和 `@PlatformStaticModule` 接入平台提供的 CRUD、权限、租户、审计与生命周期链路。
+
+真正独立的业务接口也可以在这里声明；其业务读写仍应回到领域 Service，而不是在 Controller 中重复实现数据访问和业务规则。
+
+### 应用宿主
+
+`app-boot` 是唯一启动入口。它组合 `*-web` 模块、提供环境配置并启动 Spring Boot；新增领域实现、Controller、Repository 和可复用业务测试不放在宿主中。
+
+## 扩展模式
+
+新增订单领域时，推荐形成一对模块：
+
+```text
+app-orders       Order、OrderDao、OrderService、订单领域测试
+app-orders-web   OrderWebController、订单 HTTP 契约测试
+```
+
+再由 `app-boot` 聚合 `app-orders-web`。该结构让领域演进、HTTP 交付和应用组合各自保持清晰的变化范围。
+
+## Demo 的作用
+
+`TodoItem` 是可运行、可复制的最小静态业务纵切：标准标题实体、`completed` 业务字段、`BaseDao`、组合软删和缓存能力的 Service，以及 `CrudWeb` 标准 Web 投影。它不是平台功能的完整展示，而是新领域接入时最小且可验证的参考实现。
