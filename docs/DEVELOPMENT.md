@@ -14,6 +14,24 @@ docker compose up -d
 
 `application-local.yml` 位于项目根目录且已被 Git 忽略，用于保存当前开发机的数据库连接和本地初始化密码。不要把真实密码写入示例文件或提交到仓库。
 
+### 初始化管理员
+
+裸库首次启动会创建平台管理员，用户名固定为 `admin`。在 `application-local.yml` 配置其初始密码：
+
+```yaml
+muyun:
+  initial-admin:
+    initial-password: replace-with-a-local-secret
+```
+
+部署到生产或共享环境时，不提交配置文件中的密码；通过运行环境提供 `MUYUN_INITIAL_ADMIN_INITIAL_PASSWORD`，或由部署平台的受管密钥注入。例如：
+
+```bash
+export MUYUN_INITIAL_ADMIN_INITIAL_PASSWORD='replace-with-a-secret'
+```
+
+该值只供初始数据链路创建管理员时读取，不是密码重置开关。管理员已经存在时，修改该配置不会改变其密码；应使用平台账户管理或既定的改密流程。
+
 ## 2. 先阅读可运行的 Demo
 
 以 Todo Demo 为起点阅读，顺序如下：
