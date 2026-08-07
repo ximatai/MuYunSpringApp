@@ -10,11 +10,11 @@
 ./scripts/dev-local.sh
 ```
 
-需要同时启动 Todo 前端时使用 `./scripts/dev-local.sh --web`。脚本会在首次运行时创建 ignored 的 `application-local.yml`，启动 App 自己的 PostgreSQL，并在退出时仅停止本次后端和前端进程；数据库容器与数据卷保留。
+需要同时启动 Todo 前端时使用 `./scripts/dev-local.sh --web`。脚本会在首次运行时创建 ignored 的 `application-local.yml` 和 `.env`，启动 App 自己的 PostgreSQL，并在退出时仅停止本次后端和前端进程；数据库容器与数据卷保留。
 
 `application-local.yml` 位于项目根目录且已被 Git 忽略，用于保存当前开发机的数据库连接和本地初始化密码。不要把真实密码写入示例文件或提交到仓库。
 
-App 本地环境与框架仓库完全隔离：Compose 项目为 `muyunspring-app`，数据库为 `muyun_spring_app`，宿主 PostgreSQL 端口为 `54322`，独立命名卷为 `muyun-spring-app-postgres`；本地后端端口为 `8081`，前端端口为 `5174`。因此可以与框架的 `54321`、`8080`、`5173` 同时运行。
+`.env` 定义 Compose 项目名、数据库名、数据卷、PostgreSQL/后端/前端端口及前端代理地址。默认值为 `muyunspring-app`、`muyun_spring_app`、`54322`、`8081`、`5174`，可与框架默认端口并行。若本机有多个 App checkout，fork 后应立即把这些值改为唯一值，避免共享开发数据库或端口。
 
 ### 初始化管理员
 

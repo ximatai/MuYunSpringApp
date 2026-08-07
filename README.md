@@ -108,6 +108,8 @@ http://127.0.0.1:8081/demo.todo_item/query/schema
 
 本地 profile 下，应用监听 `http://127.0.0.1:8081`，前端开发服务监听 `http://127.0.0.1:5174`，PostgreSQL 使用 `127.0.0.1:54322`。它们分别避开框架仓库的 `8080`、`5173` 与 `54321`，可同时运行。Compose 同时使用独立的 `muyunspring-app` 项目、`muyun_spring_app` 数据库和命名卷，不会复用框架开发数据。日志出现应用启动完成即表示装配成功；根路径返回 `404` 属于预期，因为样板没有把业务页面挂在 `/`。
 
+首次运行会创建已忽略的 `.env`。fork 后如果要与其他 App 并行运行，应在其中设置唯一的 Compose 项目名、数据库名、数据卷及 PostgreSQL/后端/前端端口；`dev-local.sh`、Compose、后端和 Vite 代理会使用同一份配置。
+
 首次开发态启动会初始化平台 schema，并创建用户名固定为 `admin` 的平台管理员。密码在项目根目录的 `application-local.yml` 中设置：
 
 ```yaml

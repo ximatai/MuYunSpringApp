@@ -1,16 +1,16 @@
 spring:
   datasource:
-    url: jdbc:postgresql://127.0.0.1:54322/muyun_spring_app
+    url: jdbc:postgresql://127.0.0.1:${MUYUN_APP_POSTGRES_PORT:54322}/${MUYUN_APP_POSTGRES_DB:muyun_spring_app}
     username: postgres
     password: muyun_dev
 
 server:
-  port: 8081
+  port: ${MUYUN_APP_SERVER_PORT:8081}
 
 muyun:
   web:
     cors:
-      allowed-origins: http://127.0.0.1:5174
+      allowed-origins: ${MUYUN_APP_WEB_ORIGIN:http://127.0.0.1:5174}
   runtime:
     mode: development
   initial-admin:

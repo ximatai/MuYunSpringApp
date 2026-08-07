@@ -11,11 +11,16 @@
 | Gradle 项目名 | `settings.gradle.kts` 的 `rootProject.name` | 自己的应用仓库名 |
 | Maven group 与 Java 根包 | `build.gradle.kts`，`app-*/src/main/java` | 自己稳定的组织与应用包名 |
 | 启动类 | `app-boot/.../MuYunSpringAppApplication.java` | 自己的应用名；仍只负责装配 |
-| Compose 与开发数据 | `compose.yaml` | 独立项目名、数据库名、数据卷和端口 |
+| 本地实例隔离 | `.env.example` 复制为 `.env` | 独立 Compose 项目名、数据库名、数据卷以及 PostgreSQL/后端/前端端口 |
+| Compose 拓扑 | `compose.yaml` | 通常保持模板结构；只有增加运行服务时才修改 |
 | 本地配置 | `application-local.yml.example` | 自己的应用配置；真实密码仍只放 ignored 的 `application-local.yml` 或环境变量 |
 | 前端标识 | `app-web/package.json`、页面标题与应用壳 | 自己的应用名称与品牌 |
 
 应用别名、模块别名和 Java 包名是不同概念。运行时别名按平台约束使用小写点分形式，例如 `orders.sales_order`；不要把 Gradle 名或 Java 包名当作模块别名。
+
+`.env` 是每个 checkout 的本地实例配置，已被 Git 忽略。fork 后先从 `.env.example` 创建它并修改所有本地资源标识，
+再启动服务；`dev-local.sh`、Compose、后端 local profile 与 Vite 代理会读取同一组值。不要为端口或数据库名修改
+`compose.yaml`，以免把本机隔离配置带入模板结构。
 
 ## 2. 先跑通模板
 
@@ -26,7 +31,7 @@
 ./scripts/dev-local.sh --web
 ```
 
-登录 `http://127.0.0.1:5174/` 后，确认平台菜单和 Todo 示例均可进入。初始化管理员为 `admin`，密码由根目录 ignored 的 `application-local.yml` 中 `muyun.initial-admin.initial-password` 决定。更多运行与验证说明见 [开发指南](DEVELOPMENT.md) 和 [验证说明](VERIFY.md)。
+登录 `.env` 中 `MUYUN_APP_WEB_PORT` 对应的地址（默认 `http://127.0.0.1:5174/`）后，确认平台菜单和 Todo 示例均可进入。初始化管理员为 `admin`，密码由根目录 ignored 的 `application-local.yml` 中 `muyun.initial-admin.initial-password` 决定。更多运行与验证说明见 [开发指南](DEVELOPMENT.md) 和 [验证说明](VERIFY.md)。
 
 ## 3. 用新领域替代 Demo
 
