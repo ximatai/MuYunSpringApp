@@ -28,9 +28,12 @@ import { resolveBusinessModuleView } from "./modules";
 import {
   authErrorMessage,
   changeOwnPassword,
+  clearAuthSession,
   isAuthenticationFailure,
+  isPasswordChangeRequired,
   restoreAuthSession,
   signIn as createAuthSession,
+  signOut,
   type AuthSession,
 } from "./app/auth/authSession";
 
@@ -98,7 +101,11 @@ async function loadWorkbench() {
     };
     activeTabKey.value = firstTab?.key;
   } catch (cause) {
-    if (isAuthenticationFailure(cause)) logout();
+    if (isPasswordChangeRequired(cause)) {
+      passwordChangeRequired.value = true;
+      return;
+    }
+    if (isAuthenticationFailure(cause)) clearLocalSession();
     throw cause;
   }
 }
@@ -171,8 +178,8 @@ function closeTab(key: string) {
   activeTabKey.value = nextActive;
 }
 
-function logout() {
-  localStorage.removeItem("muyun.app.token");
+function clearLocalSession() {
+  clearAuthSession();
   session.value = undefined;
   startup.value = undefined;
   activeTabKey.value = undefined;
@@ -181,12 +188,22 @@ function logout() {
   newPassword.value = "";
 }
 
+async function logout() {
+  const current = session.value;
+  clearLocalSession();
+  try {
+    await signOut(current);
+  } catch {
+    // Local session has already been cleared; the next request cannot reuse it.
+  }
+}
+
 async function completePasswordChange() {
   const current = session.value;
   if (!current) return;
   await run(async () => {
     await changeOwnPassword(current, currentPassword.value, newPassword.value);
-    logout();
+    clearLocalSession();
   });
 }
 
@@ -276,7 +293,7 @@ const activeBusinessModule = computed(() =>
     @select-menu="selectMenu"
     @change-tab="activeTabKey = $event"
     @close-tab="closeTab"
-    @user-command="$event === 'logout' ? logout() : undefined"
+    @user-command="$event === 'logout' ? void logout() : undefined"
   >
     <template #default="{ pageDescriptor }">
       <component

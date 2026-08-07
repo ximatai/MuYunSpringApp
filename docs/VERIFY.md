@@ -16,6 +16,8 @@ Gradle 命令会验证 Demo 静态模型的表/字段契约、Service 能力组�
 ./scripts/dev-local.sh --web
 ```
 
+验证未发布的前端平台包时，先建立 npm link，然后使用 `./scripts/dev-local.sh --web-linked`；它不会重装 `app-web` 依赖。
+
 日志出现应用启动完成后即可确认运行态装配成功；后端为 `http://127.0.0.1:8081`，Todo 前端为 `http://127.0.0.1:5174`。后端根路径返回 `404` 属于预期行为，因为样板未声明根路径业务接口。平台会按 development 模式初始化 schema。
 
 首次启动会用 `muyun.initial-admin.initial-password` 创建用户名为 `admin` 的初始化管理员。示例中的 `admin123` 只用于本地验证；共享或生产环境应通过 `MUYUN_INITIAL_ADMIN_INITIAL_PASSWORD` 注入强密码。该配置不会重置已存在管理员的密码。

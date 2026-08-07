@@ -3,17 +3,19 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WITH_WEB=false
+WEB_LINKED=false
 PIDS=()
 
 usage() {
   cat <<'USAGE'
-Usage: ./scripts/dev-local.sh [--web]
+Usage: ./scripts/dev-local.sh [--web | --web-linked]
 
 Starts the independent MuYunSpringApp local stack:
   PostgreSQL on 127.0.0.1:54322 and app-boot on 127.0.0.1:8081.
 
 Options:
   --web     Also start app-web on http://127.0.0.1:5174/.
+  --web-linked  Start app-web from its existing npm link without running npm ci.
 
 Environment:
   MUYUN_REPOSITORY  Optional local Maven repository containing a framework consumer build.
@@ -53,6 +55,7 @@ verify_node_version() {
 while (($# > 0)); do
   case "$1" in
     --web) WITH_WEB=true ;;
+    --web-linked) WITH_WEB=true; WEB_LINKED=true ;;
     -h|--help) usage; exit 0 ;;
     *) usage >&2; exit 1 ;;
   esac
@@ -89,8 +92,13 @@ for port in "${PORTS[@]}"; do
   fi
 done
 
-if [[ "$WITH_WEB" == true ]]; then
+if [[ "$WITH_WEB" == true && "$WEB_LINKED" == false ]]; then
   npm ci --prefix app-web
+fi
+if [[ "$WEB_LINKED" == true && ! -L app-web/node_modules/@ximatai/muyun-web-app ]]; then
+  echo "--web-linked requires app-web/node_modules/@ximatai/muyun-web-app to be an npm link." >&2
+  echo "Run npm link /path/to/MuYunSpring/build/consumer-npm/staging/web-app first." >&2
+  exit 1
 fi
 
 GRADLE_ARGS=()
@@ -107,7 +115,11 @@ fi
 PIDS+=("$!")
 
 if [[ "$WITH_WEB" == true ]]; then
-  npm run dev --prefix app-web &
+  if [[ "$WEB_LINKED" == true ]]; then
+    npm run dev:linked --prefix app-web &
+  else
+    npm run dev --prefix app-web &
+  fi
   PIDS+=("$!")
 fi
 

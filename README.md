@@ -22,11 +22,11 @@ Gradle 生产依赖方向（调用者 → 被依赖者）：
 app-boot → app-demo-web → app-demo → MuYunSpring BOM / Starter
 ```
 
-| 模块 | 职责 |
-| --- | --- |
-| `app-boot` | 应用启动、运行配置和业务模块组合。 |
-| `app-demo` | 最小待办业务：模型、DAO、Service 与领域测试。 |
-| `app-demo-web` | 待办业务的标准 HTTP 投影与 Web 契约测试。 |
+| 模块           | 职责                                          |
+| -------------- | --------------------------------------------- |
+| `app-boot`     | 应用启动、运行配置和业务模块组合。            |
+| `app-demo`     | 最小待办业务：模型、DAO、Service 与领域测试。 |
+| `app-demo-web` | 待办业务的标准 HTTP 投影与 Web 契约测试。     |
 
 真实业务以 `app-<domain>` / `app-<domain>-web` 成对扩展。详见[架构边界](docs/ARCHITECTURE.md)。
 
@@ -98,6 +98,12 @@ http://127.0.0.1:8080/demo.todo_item/query/schema
 
 ```bash
 ./scripts/dev-local.sh --web
+```
+
+联调尚未发布的前端平台包时，先按[开发指南](docs/DEVELOPMENT.md)建立 npm link，再使用不重装依赖的启动模式：
+
+```bash
+./scripts/dev-local.sh --web-linked
 ```
 
 本地 profile 下，应用监听 `http://127.0.0.1:8081`，前端开发服务监听 `http://127.0.0.1:5174`，PostgreSQL 使用 `127.0.0.1:54322`。它们分别避开框架仓库的 `8080`、`5173` 与 `54321`，可同时运行。Compose 同时使用独立的 `muyunspring-app` 项目、`muyun_spring_app` 数据库和命名卷，不会复用框架开发数据。日志出现应用启动完成即表示装配成功；根路径返回 `404` 属于预期，因为样板没有把业务页面挂在 `/`。

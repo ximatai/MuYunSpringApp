@@ -133,6 +133,8 @@ npm link /path/to/MuYunSpring/build/consumer-npm/staging/web-app
 npm run dev:linked
 ```
 
+需要一键带起后端与已链接前端时，回到项目根目录执行 `./scripts/dev-local.sh --web-linked`。该模式会检查 npm link 并使用 `dev:linked`，不会执行会覆盖链接的 `npm ci`；常规 `--web` 始终对应干净的 registry 安装。
+
 `app-web` 已配置 Vite 保留该链接的包路径，使平台包的 `vue`、Ant Design Vue 和图标 peer dependencies 仍从 App 自己的 `node_modules` 解析；不要向生成包目录安装依赖或为联调建立源码 alias。
 
 交付前或需要确认干净安装时，再由框架构建 tarball 并在 App 中覆盖安装；该命令不修改 `package.json` 或锁文件：
