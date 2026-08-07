@@ -121,7 +121,7 @@ dependencies {
 ```bash
 ./gradlew test \
   -PmuyunRepository=/path/to/muyun-consumer-repo \
-  -PmuyunSpringVersion=0.26.4-SNAPSHOT
+  -PmuyunSpringVersion=0.26.5-SNAPSHOT
 ```
 
 本机持续联调未发布的前端平台包时，优先链接框架生成包：它只消费公开 `exports`、声明文件和样式，不走 npm 正式发布。框架重新打包会替换生成包目录，因此启动或重启 App 时使用 `dev:linked` 强制刷新 Vite 的依赖缓存。
@@ -140,7 +140,7 @@ npm run dev:linked
 交付前或需要确认干净安装时，再由框架构建 tarball 并在 App 中覆盖安装；该命令不修改 `package.json` 或锁文件：
 
 ```bash
-npm run install:framework-local --prefix app-web -- /path/to/ximatai-muyun-web-app-0.26.4.tgz
+npm run install:framework-local --prefix app-web -- /path/to/ximatai-muyun-web-app-0.26.5.tgz
 ```
 
 ## 6. 提交前验证

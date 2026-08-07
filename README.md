@@ -1,8 +1,8 @@
 # MuYunSpringApp
 
-`MuYunSpringApp` 是一个基于 [MuYunSpring](https://github.com/ximatai/MuYunSpring) 的独立业务应用样板。它以业务模块、应用配置和运行宿主组织交付，通过 BOM 与 Starter 接入已发布的平台能力。
+`MuYunSpringApp` 是一个基于 [MuYunSpring](https://github.com/ximatai/MuYunSpring) 的管理型业务应用模板。新项目以 fork 该仓库开始：业务模块、应用配置和运行宿主在自己的仓库中演进，通过 BOM 与 Starter 接入已发布的平台能力。
 
-它适合用作企业应用、内部管理系统或可配置业务系统的二开起点：开发者拥有自己的业务代码与发布节奏，同时直接使用平台已经沉淀的数据访问、租户、权限、审计、生命周期和标准 Web 交付能力。
+它适合用作企业应用、内部管理系统或可配置业务系统的二开起点：开发者拥有自己的业务代码与发布节奏，同时直接使用平台已经沉淀的数据访问、租户、权限、审计、生命周期和标准 Web 交付能力。fork 后的首日改名、配置隔离和首个领域创建见 [Fork 指南](docs/FORK_GUIDE.md)。
 
 ## 为什么这种模式开发更快
 
@@ -74,13 +74,13 @@ public class TodoItemWebController extends WebSupport<TodoItemService>
 应用启动并以拥有 `demo.todo_item` 查看权限的用户登录后，在浏览器打开：
 
 ```text
-http://127.0.0.1:8080/demo.todo_item/openapi
+http://127.0.0.1:8081/demo.todo_item/openapi
 ```
 
 该 URL 返回模块的 OpenAPI 3.1.1 文档，可直接看到 Todo 的模型 schema 与可用标准动作。对应的列表 schema URL 是：
 
 ```text
-http://127.0.0.1:8080/demo.todo_item/query/schema
+http://127.0.0.1:8081/demo.todo_item/query/schema
 ```
 
 两个 URL 都遵循模块查看权限；未登录时返回 `401`，这表示权限链路正常生效。
@@ -137,13 +137,13 @@ muyun:
 ```bash
 ./gradlew test \
   -PmuyunRepository=/path/to/muyun-consumer-repo \
-  -PmuyunSpringVersion=0.26.4-SNAPSHOT
+  -PmuyunSpringVersion=0.26.5-SNAPSHOT
 ```
 
 前端临时联调本地 tarball 时使用：
 
 ```bash
-npm run install:framework-local --prefix app-web -- /path/to/ximatai-muyun-web-app-0.26.4.tgz
+npm run install:framework-local --prefix app-web -- /path/to/ximatai-muyun-web-app-0.26.5.tgz
 ```
 
 完整的新增领域、运行配置、框架升级和验证步骤见[开发指南](docs/DEVELOPMENT.md)与[验证说明](docs/VERIFY.md)。需要判断平台已有能力和接入入口时，查看[平台能力索引](docs/PLATFORM_CAPABILITIES.md)。

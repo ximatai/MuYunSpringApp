@@ -1,6 +1,6 @@
 # 架构边界
 
-`MuYunSpringApp` 是独立业务应用：业务模块、应用配置和运行宿主都在本仓库内演进；MuYunSpring 通过稳定的 BOM 与 Starter 提供底座能力。
+`MuYunSpringApp` 是独立业务应用模板：新项目 fork 本仓库后，业务模块、应用配置和运行宿主都在自己的仓库内演进；MuYunSpring 通过稳定的 BOM 与 Starter 提供底座能力。模板的首日改造步骤见 [Fork 指南](FORK_GUIDE.md)。
 
 ## 模块关系
 
@@ -68,3 +68,5 @@ app-orders-web   OrderWebController、订单 HTTP 契约测试
 ## Demo 的作用
 
 `TodoItem` 是可运行、可复制的最小静态业务纵切：标准标题实体、`completed` 业务字段、`BaseDao`、组合软删和缓存能力的 Service，以及 `CrudWeb` 标准 Web 投影。它不是平台功能的完整展示，而是新领域接入时最小且可验证的参考实现。
+
+fork 后不要把 `app-demo` 演变成正式业务域：先以它阅读和验证接入形态，再创建 `app-<domain>` / `app-<domain>-web` 承载真实业务。Demo 可在新领域跑通后作为独立的、可回归验证的参考保留；若产品不再需要它，应在一次完整改动中移除其 Gradle 注册、Boot 组合、菜单、前端模块和测试，不能只删除部分源码。
