@@ -1,6 +1,6 @@
 # 架构边界
 
-`MuYunSpringApp` 是独立业务应用：业务模块、应用配置和运行宿主都在本仓库内演进；MuYunSpring 通过稳定的 BOM 与 Starter 提供底座能力。
+`MuYunSpringApp` 是独立业务应用模板：新项目 fork 本仓库后，业务模块、应用配置和运行宿主都在自己的仓库内演进；MuYunSpring 通过稳定的 BOM 与 Starter 提供底座能力。模板的首日改造步骤见 [Fork 指南](FORK_GUIDE.md)。
 
 ## 模块关系
 
@@ -37,6 +37,23 @@ Web 模块负责把领域 Service 交付为 HTTP 契约。标准业务对象优�
 
 `app-boot` 是唯一启动入口。它组合 `*-web` 模块、提供环境配置并启动 Spring Boot；新增领域实现、Controller、Repository 和可复用业务测试不放在宿主中。
 
+## 前端认证与登录页
+
+登录页是 App 级体验，可以复用平台默认页面，也可以按业务品牌自行实现。无论采用哪种页面，认证接口、token/session 存储、认证失效、强制改密和错误归一属于平台认证内核，业务页面不得各自定义协议。当前 `app-web` 通过已发布的 `@ximatai/muyun-web-app` 消费工作台、菜单与平台管理运行时；App 自己只保留 `authSession` 和 Todo 页面等应用体验编排。
+
+## 前端源码边界
+
+`app-web/src` 按应用壳与业务模块组织：
+
+```text
+App.vue                  应用壳、登录与平台工作台编排
+app/auth/                App 级认证会话适配
+modules/<domain>/        一个业务域的页面、请求 client 与模块声明
+modules/index.ts         App 业务模块注册表；按菜单 route 解析页面
+```
+
+业务开发从 `modules/<domain>` 开始。模块目录只包含该领域自己的页面、状态和接口调用；在 `index.ts` 导出它的菜单 route 与组件。随后把模块加入 `modules/index.ts`，由应用壳统一完成页签、鉴权上下文和平台页面兜底。`App.vue` 不直接导入或判断具体 Todo、订单等业务字段，避免业务增加后把应用壳演变成巨型页面。
+
 ## 扩展模式
 
 新增订单领域时，推荐形成一对模块：
@@ -51,3 +68,5 @@ app-orders-web   OrderWebController、订单 HTTP 契约测试
 ## Demo 的作用
 
 `TodoItem` 是可运行、可复制的最小静态业务纵切：标准标题实体、`completed` 业务字段、`BaseDao`、组合软删和缓存能力的 Service，以及 `CrudWeb` 标准 Web 投影。它不是平台功能的完整展示，而是新领域接入时最小且可验证的参考实现。
+
+fork 后不要把 `app-demo` 演变成正式业务域：先以它阅读和验证接入形态，再创建 `app-<domain>` / `app-<domain>-web` 承载真实业务。Demo 可在新领域跑通后作为独立的、可回归验证的参考保留；若产品不再需要它，应在一次完整改动中移除其 Gradle 注册、Boot 组合、菜单、前端模块和测试，不能只删除部分源码。

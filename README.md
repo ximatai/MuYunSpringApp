@@ -1,8 +1,8 @@
 # MuYunSpringApp
 
-`MuYunSpringApp` 是一个基于 [MuYunSpring](https://github.com/ximatai/MuYunSpring) 的独立业务应用样板。它以业务模块、应用配置和运行宿主组织交付，通过 BOM 与 Starter 接入已发布的平台能力。
+`MuYunSpringApp` 是一个基于 [MuYunSpring](https://github.com/ximatai/MuYunSpring) 的管理型业务应用模板。新项目以 fork 该仓库开始：业务模块、应用配置和运行宿主在自己的仓库中演进，通过 BOM 与 Starter 接入已发布的平台能力。
 
-它适合用作企业应用、内部管理系统或可配置业务系统的二开起点：开发者拥有自己的业务代码与发布节奏，同时直接使用平台已经沉淀的数据访问、租户、权限、审计、生命周期和标准 Web 交付能力。
+它适合用作企业应用、内部管理系统或可配置业务系统的二开起点：开发者拥有自己的业务代码与发布节奏，同时直接使用平台已经沉淀的数据访问、租户、权限、审计、生命周期和标准 Web 交付能力。fork 后的首日改名、配置隔离和首个领域创建见 [Fork 指南](docs/FORK_GUIDE.md)。
 
 ## 为什么这种模式开发更快
 
@@ -22,11 +22,11 @@ Gradle 生产依赖方向（调用者 → 被依赖者）：
 app-boot → app-demo-web → app-demo → MuYunSpring BOM / Starter
 ```
 
-| 模块 | 职责 |
-| --- | --- |
-| `app-boot` | 应用启动、运行配置和业务模块组合。 |
-| `app-demo` | 最小待办业务：模型、DAO、Service 与领域测试。 |
-| `app-demo-web` | 待办业务的标准 HTTP 投影与 Web 契约测试。 |
+| 模块           | 职责                                          |
+| -------------- | --------------------------------------------- |
+| `app-boot`     | 应用启动、运行配置和业务模块组合。            |
+| `app-demo`     | 最小待办业务：模型、DAO、Service 与领域测试。 |
+| `app-demo-web` | 待办业务的标准 HTTP 投影与 Web 契约测试。     |
 
 真实业务以 `app-<domain>` / `app-<domain>-web` 成对扩展。详见[架构边界](docs/ARCHITECTURE.md)。
 
@@ -74,29 +74,39 @@ public class TodoItemWebController extends WebSupport<TodoItemService>
 应用启动并以拥有 `demo.todo_item` 查看权限的用户登录后，在浏览器打开：
 
 ```text
-http://127.0.0.1:8080/demo.todo_item/openapi
+http://127.0.0.1:8081/demo.todo_item/openapi
 ```
 
 该 URL 返回模块的 OpenAPI 3.1.1 文档，可直接看到 Todo 的模型 schema 与可用标准动作。对应的列表 schema URL 是：
 
 ```text
-http://127.0.0.1:8080/demo.todo_item/query/schema
+http://127.0.0.1:8081/demo.todo_item/query/schema
 ```
 
 两个 URL 都遵循模块查看权限；未登录时返回 `401`，这表示权限链路正常生效。
 
 ## 快速运行
 
-要求 Java 21 和 Docker Compose v2。
+要求 Java 21 与 Docker Compose v2；启动前端还需要 Node.js `>=22.23.0`。
 
 ```bash
 ./gradlew test
-cp app-boot/src/main/resources/application-local.yml.example application-local.yml
-docker compose up -d
-./gradlew :app-boot:bootRun --args='--spring.profiles.active=local'
+./scripts/dev-local.sh
 ```
 
-应用默认监听 `http://127.0.0.1:8080`，本地 PostgreSQL 使用 `127.0.0.1:54322`。日志出现应用启动完成即表示装配成功；根路径返回 `404` 属于预期，因为样板没有把业务页面挂在 `/`。
+同时启动 Todo 前端：
+
+```bash
+./scripts/dev-local.sh --web
+```
+
+联调尚未发布的前端平台包时，先按[开发指南](docs/DEVELOPMENT.md)建立 npm link，再使用不重装依赖的启动模式：
+
+```bash
+./scripts/dev-local.sh --web-linked
+```
+
+本地 profile 下，应用监听 `http://127.0.0.1:8081`，前端开发服务监听 `http://127.0.0.1:5174`，PostgreSQL 使用 `127.0.0.1:54322`。它们分别避开框架仓库的 `8080`、`5173` 与 `54321`，可同时运行。Compose 同时使用独立的 `muyunspring-app` 项目、`muyun_spring_app` 数据库和命名卷，不会复用框架开发数据。日志出现应用启动完成即表示装配成功；根路径返回 `404` 属于预期，因为样板没有把业务页面挂在 `/`。
 
 首次开发态启动会初始化平台 schema，并创建用户名固定为 `admin` 的平台管理员。密码在项目根目录的 `application-local.yml` 中设置：
 
@@ -122,10 +132,18 @@ muyun:
 ./gradlew clean test :app-boot:bootJar
 ```
 
-框架版本由根目录 `gradle.properties` 的 `muyunSpringVersion` 唯一管理。默认从 Maven Central 解析；开发尚未发布的框架构件时，可临时传入本地消费者仓库：
+框架发布版本以根目录 `gradle.properties` 的 `muyunSpringVersion` 为准；前端构建会校验 npm 包声明与它一致。默认从 Maven Central/npm 解析；开发尚未发布的后端框架构件时，可临时传入本地消费者仓库和该仓库中的实际版本：
 
 ```bash
-./gradlew test -PmuyunRepository=/path/to/muyun-consumer-repo
+./gradlew test \
+  -PmuyunRepository=/path/to/muyun-consumer-repo \
+  -PmuyunSpringVersion=0.26.5-SNAPSHOT
+```
+
+前端临时联调本地 tarball 时使用：
+
+```bash
+npm run install:framework-local --prefix app-web -- /path/to/ximatai-muyun-web-app-0.26.5.tgz
 ```
 
 完整的新增领域、运行配置、框架升级和验证步骤见[开发指南](docs/DEVELOPMENT.md)与[验证说明](docs/VERIFY.md)。需要判断平台已有能力和接入入口时，查看[平台能力索引](docs/PLATFORM_CAPABILITIES.md)。
