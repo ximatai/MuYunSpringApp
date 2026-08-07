@@ -25,7 +25,7 @@ public class TodoMenuConfiguration {
 
             @Override
             public int order() {
-                return 10;
+                return 11;
             }
 
             @Override

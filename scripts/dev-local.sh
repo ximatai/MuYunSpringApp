@@ -11,10 +11,10 @@ usage() {
 Usage: ./scripts/dev-local.sh [--web | --web-linked]
 
 Starts the independent MuYunSpringApp local stack:
-  PostgreSQL on 127.0.0.1:54322 and app-boot on 127.0.0.1:8081.
+  PostgreSQL and App ports come from .env (defaults: 54322 and 8081).
 
 Options:
-  --web     Also start app-web on http://127.0.0.1:5174/.
+  --web     Also start app-web on the port configured in .env (default: 5174).
   --web-linked  Start app-web from its existing npm link without running npm ci.
 
 Environment:
@@ -32,7 +32,7 @@ cleanup() {
 wait_for_postgres() {
   local attempts=30
   while ((attempts > 0)); do
-    if docker compose exec -T postgres pg_isready -U postgres -d muyun_spring_app >/dev/null 2>&1; then
+    if docker compose exec -T postgres pg_isready -U postgres -d "$MUYUN_APP_POSTGRES_DB" >/dev/null 2>&1; then
       return
     fi
     sleep 1
@@ -77,13 +77,21 @@ if [[ ! -f application-local.yml ]]; then
   cp app-boot/src/main/resources/application-local.yml.example application-local.yml
   echo "Created ignored application-local.yml from the example."
 fi
+if [[ ! -f .env ]]; then
+  cp .env.example .env
+  echo "Created ignored .env from the example. Set unique local ports and names when running multiple Apps."
+fi
+
+set -a
+. ./.env
+set +a
 
 docker compose up -d
 wait_for_postgres
 
-PORTS=(8081)
+PORTS=("$MUYUN_APP_SERVER_PORT")
 if [[ "$WITH_WEB" == true ]]; then
-  PORTS+=(5174)
+  PORTS+=("$MUYUN_APP_WEB_PORT")
 fi
 for port in "${PORTS[@]}"; do
   if lsof -tiTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1; then
@@ -123,9 +131,9 @@ if [[ "$WITH_WEB" == true ]]; then
   PIDS+=("$!")
 fi
 
-echo "Backend:  http://127.0.0.1:8081"
+echo "Backend:  http://127.0.0.1:$MUYUN_APP_SERVER_PORT"
 if [[ "$WITH_WEB" == true ]]; then
-  echo "Frontend: http://127.0.0.1:5174/"
+  echo "Frontend: http://127.0.0.1:$MUYUN_APP_WEB_PORT/"
 fi
 echo "Press Ctrl-C to stop application processes; PostgreSQL remains running."
 

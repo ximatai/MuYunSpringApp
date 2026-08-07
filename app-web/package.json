@@ -5,8 +5,8 @@
   "type": "module",
   "engines": { "node": ">=22.23.0" },
   "scripts": {
-    "dev": "vite --host 127.0.0.1 --port 5174",
-    "dev:linked": "vite --host 127.0.0.1 --port 5174 --force",
+    "dev": "vite --host 127.0.0.1",
+    "dev:linked": "vite --host 127.0.0.1 --force",
     "build": "npm run verify:framework-version && vue-tsc --noEmit && vite build",
     "install:framework-local": "node scripts/install-framework-local.mjs",
     "verify:framework-version": "node scripts/verify-framework-version.mjs"

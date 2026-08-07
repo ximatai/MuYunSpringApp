@@ -1,4 +1,4 @@
-name: muyunspring-app
+name: ${MUYUN_APP_COMPOSE_PROJECT:-muyunspring-app}
 
 services:
   postgres:
@@ -6,11 +6,12 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: muyun_dev
-      POSTGRES_DB: muyun_spring_app
+      POSTGRES_DB: ${MUYUN_APP_POSTGRES_DB:-muyun_spring_app}
     ports:
-      - "54322:5432"
+      - "${MUYUN_APP_POSTGRES_PORT:-54322}:5432"
     volumes:
-      - muyun-spring-app-postgres:/var/lib/postgresql
+      - postgres-data:/var/lib/postgresql
 
 volumes:
-  muyun-spring-app-postgres:
+  postgres-data:
+    name: ${MUYUN_APP_POSTGRES_VOLUME:-muyun-spring-app-postgres}
