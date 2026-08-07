@@ -87,16 +87,20 @@ http://127.0.0.1:8080/demo.todo_item/query/schema
 
 ## 快速运行
 
-要求 Java 21 和 Docker Compose v2。
+要求 Java 21 与 Docker Compose v2；启动前端还需要 Node.js `>=22.23.0`。
 
 ```bash
 ./gradlew test
-cp app-boot/src/main/resources/application-local.yml.example application-local.yml
-docker compose up -d
-./gradlew :app-boot:bootRun --args='--spring.profiles.active=local'
+./scripts/dev-local.sh
 ```
 
-应用默认监听 `http://127.0.0.1:8080`，本地 PostgreSQL 使用 `127.0.0.1:54322`。日志出现应用启动完成即表示装配成功；根路径返回 `404` 属于预期，因为样板没有把业务页面挂在 `/`。
+同时启动 Todo 前端：
+
+```bash
+./scripts/dev-local.sh --web
+```
+
+本地 profile 下，应用监听 `http://127.0.0.1:8081`，前端开发服务监听 `http://127.0.0.1:5174`，PostgreSQL 使用 `127.0.0.1:54322`。它们分别避开框架仓库的 `8080`、`5173` 与 `54321`，可同时运行。Compose 同时使用独立的 `muyunspring-app` 项目、`muyun_spring_app` 数据库和命名卷，不会复用框架开发数据。日志出现应用启动完成即表示装配成功；根路径返回 `404` 属于预期，因为样板没有把业务页面挂在 `/`。
 
 首次开发态启动会初始化平台 schema，并创建用户名固定为 `admin` 的平台管理员。密码在项目根目录的 `application-local.yml` 中设置：
 
@@ -122,10 +126,18 @@ muyun:
 ./gradlew clean test :app-boot:bootJar
 ```
 
-框架版本由根目录 `gradle.properties` 的 `muyunSpringVersion` 唯一管理。默认从 Maven Central 解析；开发尚未发布的框架构件时，可临时传入本地消费者仓库：
+框架发布版本以根目录 `gradle.properties` 的 `muyunSpringVersion` 为准；前端构建会校验 npm 包声明与它一致。默认从 Maven Central/npm 解析；开发尚未发布的后端框架构件时，可临时传入本地消费者仓库和该仓库中的实际版本：
 
 ```bash
-./gradlew test -PmuyunRepository=/path/to/muyun-consumer-repo
+./gradlew test \
+  -PmuyunRepository=/path/to/muyun-consumer-repo \
+  -PmuyunSpringVersion=0.26.4-SNAPSHOT
+```
+
+前端临时联调本地 tarball 时使用：
+
+```bash
+npm run install:framework-local --prefix app-web -- /path/to/ximatai-muyun-web-app-0.26.4.tgz
 ```
 
 完整的新增领域、运行配置、框架升级和验证步骤见[开发指南](docs/DEVELOPMENT.md)与[验证说明](docs/VERIFY.md)。需要判断平台已有能力和接入入口时，查看[平台能力索引](docs/PLATFORM_CAPABILITIES.md)。

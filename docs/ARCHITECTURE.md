@@ -37,6 +37,23 @@ Web 模块负责把领域 Service 交付为 HTTP 契约。标准业务对象优�
 
 `app-boot` 是唯一启动入口。它组合 `*-web` 模块、提供环境配置并启动 Spring Boot；新增领域实现、Controller、Repository 和可复用业务测试不放在宿主中。
 
+## 前端认证与登录页
+
+登录页是 App 级体验，可以复用平台默认页面，也可以按业务品牌自行实现。无论采用哪种页面，认证接口、token/session 存储、认证失效、强制改密和错误归一属于平台认证内核，业务页面不得各自定义协议。当前 `app-web` 通过已发布的 `@ximatai/muyun-web-app` 消费工作台、菜单与平台管理运行时；App 自己只保留 `authSession` 和 Todo 页面等应用体验编排。
+
+## 前端源码边界
+
+`app-web/src` 按应用壳与业务模块组织：
+
+```text
+App.vue                  应用壳、登录与平台工作台编排
+app/auth/                App 级认证会话适配
+modules/<domain>/        一个业务域的页面、请求 client 与模块声明
+modules/index.ts         App 业务模块注册表；按菜单 route 解析页面
+```
+
+业务开发从 `modules/<domain>` 开始。模块目录只包含该领域自己的页面、状态和接口调用；在 `index.ts` 导出它的菜单 route 与组件。随后把模块加入 `modules/index.ts`，由应用壳统一完成页签、鉴权上下文和平台页面兜底。`App.vue` 不直接导入或判断具体 Todo、订单等业务字段，避免业务增加后把应用壳演变成巨型页面。
+
 ## 扩展模式
 
 新增订单领域时，推荐形成一对模块：

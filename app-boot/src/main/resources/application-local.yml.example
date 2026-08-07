@@ -4,7 +4,13 @@ spring:
     username: postgres
     password: muyun_dev
 
+server:
+  port: 8081
+
 muyun:
+  web:
+    cors:
+      allowed-origins: http://127.0.0.1:5174
   runtime:
     mode: development
   initial-admin:

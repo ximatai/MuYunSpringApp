@@ -1,3 +1,5 @@
+name: muyunspring-app
+
 services:
   postgres:
     image: postgres:18.4-alpine
